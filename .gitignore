@@ -1,0 +1,7 @@
+# 项目排除路径
+/backend/blog-auth/target/
+/backend/blog-common/target/
+/backend/blog-forum/target/
+/backend/blog-gateway/target/
+/backend/blog-service/target/
+/backend/blog-user/target/
