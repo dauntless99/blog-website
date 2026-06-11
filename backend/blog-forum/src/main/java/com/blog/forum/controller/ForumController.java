@@ -12,25 +12,49 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 论坛控制器
+ * 处理分类管理、帖子管理、回复管理等请求
+ */
 @RestController
 @RequestMapping("/api/forum")
 @RequiredArgsConstructor
 public class ForumController {
 
+    /** 论坛服务 */
     private final ForumService forumService;
 
-    // ===== 分类 =====
+    // ==================== 分类相关接口 ====================
+
+    /**
+     * 获取所有分类
+     * @return 分类列表
+     */
     @GetMapping("/categories")
     public Result<List<ForumCategory>> getCategories() {
         return Result.success(forumService.getAllCategories());
     }
 
+    /**
+     * 创建分类
+     * @param category 分类对象
+     * @return 创建的分类
+     */
     @PostMapping("/categories")
     public Result<ForumCategory> createCategory(@RequestBody ForumCategory category) {
         return Result.success("创建分类成功", forumService.createCategory(category));
     }
 
-    // ===== 帖子 =====
+    // ==================== 帖子相关接口 ====================
+
+    /**
+     * 获取帖子列表
+     * @param categoryId 分类ID（可选）
+     * @param page 页码（从0开始，默认0）
+     * @param size 每页大小（默认10）
+     * @param keyword 搜索关键词（可选）
+     * @return 分页帖子列表
+     */
     @GetMapping("/threads")
     public Result<Map<String, Object>> getThreads(
             @RequestParam(required = false) Long categoryId,
@@ -47,6 +71,11 @@ public class ForumController {
         ));
     }
 
+    /**
+     * 获取帖子详情
+     * @param id 帖子ID
+     * @return 帖子详情
+     */
     @GetMapping("/threads/{id}")
     public Result<ForumThread> getThreadDetail(@PathVariable Long id) {
         try {
@@ -56,6 +85,12 @@ public class ForumController {
         }
     }
 
+    /**
+     * 创建帖子
+     * @param request 创建请求体
+     * @param token 用户Token（Authorization请求头）
+     * @return 创建的帖子
+     */
     @PostMapping("/threads")
     public Result<ForumThread> createThread(@RequestBody Map<String, Object> request,
                                              @RequestHeader("Authorization") String token) {
@@ -66,6 +101,12 @@ public class ForumController {
         }
     }
 
+    /**
+     * 删除帖子
+     * @param id 帖子ID
+     * @param token 用户Token（Authorization请求头）
+     * @return 删除结果
+     */
     @DeleteMapping("/threads/{id}")
     public Result<Void> deleteThread(@PathVariable Long id,
                                       @RequestHeader("Authorization") String token) {
@@ -77,7 +118,15 @@ public class ForumController {
         }
     }
 
-    // ===== 回复 =====
+    // ==================== 回复相关接口 ====================
+
+    /**
+     * 获取帖子回复列表
+     * @param threadId 帖子ID
+     * @param page 页码（从0开始，默认0）
+     * @param size 每页大小（默认20）
+     * @return 分页回复列表
+     */
     @GetMapping("/threads/{threadId}/replies")
     public Result<Map<String, Object>> getReplies(
             @PathVariable Long threadId,
@@ -93,6 +142,12 @@ public class ForumController {
         ));
     }
 
+    /**
+     * 创建回复
+     * @param request 创建请求体
+     * @param token 用户Token（Authorization请求头）
+     * @return 创建的回复
+     */
     @PostMapping("/replies")
     public Result<ForumReply> createReply(@RequestBody Map<String, Object> request,
                                            @RequestHeader("Authorization") String token) {
