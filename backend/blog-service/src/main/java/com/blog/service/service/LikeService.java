@@ -1,6 +1,6 @@
 package com.blog.service.service;
 
-import com.blog.auth.service.PointService;
+import com.blog.common.service.PointService;
 import com.blog.common.util.JwtUtil;
 import com.blog.service.entity.BlogComment;
 import com.blog.service.entity.BlogLike;

@@ -1,7 +1,7 @@
 package com.blog.common.service;
 
-import com.blog.auth.entity.User;
-import com.blog.auth.repository.UserRepository;
+import com.blog.common.entity.User;
+import com.blog.common.repository.UserRepository;
 import com.blog.common.entity.Notification;
 import com.blog.common.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;

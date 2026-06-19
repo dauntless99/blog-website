@@ -47,4 +47,11 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
      * @return 分页公告列表
      */
     Page<Announcement> findByPublisherIdOrderByCreatedAtDesc(Long publisherId, Pageable pageable);
+
+    /**
+     * 查询所有公告并按创建时间倒序排序
+     * @param pageable 分页参数
+     * @return 分页公告列表
+     */
+    Page<Announcement> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

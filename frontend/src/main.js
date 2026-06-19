@@ -15,7 +15,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
+// 注册 Pinia 状态管理
 app.use(createPinia())
+
+// 注册路由
 app.use(router)
-app.use(ElementPlus, { locale: undefined }) // 使用默认中文
+
+// 注册 Element Plus
+app.use(ElementPlus)
+
 app.mount('#app')

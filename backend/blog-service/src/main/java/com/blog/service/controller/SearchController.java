@@ -1,7 +1,6 @@
 package com.blog.service.controller;
 
 import com.blog.common.result.Result;
-import com.blog.forum.entity.ForumThread;
 import com.blog.service.entity.BlogPost;
 import com.blog.service.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -95,7 +94,7 @@ public class SearchController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
-        Page<ForumThread> threadPage = searchService.advancedSearchThreads(
+        Page<Map<String, Object>> threadPage = searchService.advancedSearchThreads(
                 keyword, categoryId, authorId, sortBy, sortOrder, page, size);
         
         return Result.success(Map.of(

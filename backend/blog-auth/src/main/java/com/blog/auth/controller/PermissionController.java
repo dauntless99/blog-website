@@ -1,8 +1,8 @@
 package com.blog.auth.controller;
 
-import com.blog.auth.entity.UserLevel;
-import com.blog.auth.service.PermissionService;
-import com.blog.auth.service.PointService;
+import com.blog.common.entity.UserLevel;
+import com.blog.common.service.PermissionService;
+import com.blog.common.service.PointService;
 import com.blog.common.result.Result;
 import com.blog.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -98,7 +98,7 @@ public class PermissionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         Long userId = JwtUtil.getUserId(token);
-        Page<com.blog.auth.entity.PointRecord> recordPage = pointService.getPointRecords(userId, page, size);
+        Page<com.blog.common.entity.PointRecord> recordPage = pointService.getPointRecords(userId, page, size);
         return Result.success(Map.of(
                 "content", recordPage.getContent(),
                 "totalElements", recordPage.getTotalElements(),

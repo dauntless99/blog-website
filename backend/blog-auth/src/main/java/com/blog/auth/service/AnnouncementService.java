@@ -83,6 +83,15 @@ public class AnnouncementService {
     }
 
     /**
+     * 创建公告（直接保存实体）
+     * @param announcement 公告实体
+     * @return 创建的公告
+     */
+    public Announcement createAnnouncement(Announcement announcement) {
+        return announcementRepository.save(announcement);
+    }
+
+    /**
      * 发布公告
      * @param id 公告ID
      * @param token 用户Token
@@ -128,6 +137,15 @@ public class AnnouncementService {
             announcement.setExpireTime(LocalDateTime.parse((String) request.get("expireTime")));
         }
         
+        return announcementRepository.save(announcement);
+    }
+
+    /**
+     * 更新公告（直接保存实体）
+     * @param announcement 公告实体
+     * @return 更新后的公告
+     */
+    public Announcement updateAnnouncement(Announcement announcement) {
         return announcementRepository.save(announcement);
     }
 

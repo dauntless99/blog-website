@@ -3,6 +3,8 @@ package com.blog.auth.service;
 import com.blog.auth.entity.Department;
 import com.blog.auth.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ public class DepartmentService {
                 (parentId != null && parentId.equals(dept.getParentId()))) {
                 Map<String, Object> node = new HashMap<>();
                 node.put("id", dept.getId());
-                node.put("name", dept.getName());
+                node.put("name", dept.getDeptName());
                 node.put("description", dept.getDescription());
                 node.put("parentId", dept.getParentId());
                 node.put("managerId", dept.getManagerId());
@@ -68,6 +70,16 @@ public class DepartmentService {
     }
 
     /**
+     * 获取部门列表（分页）
+     * @param page 页码
+     * @param size 每页大小
+     * @return 部门分页
+     */
+    public Page<Department> getDepartmentList(int page, int size) {
+        return departmentRepository.findAll(PageRequest.of(page, size));
+    }
+
+    /**
      * 根据ID获取部门详情
      * @param id 部门ID
      * @return 部门详情
@@ -89,15 +101,14 @@ public class DepartmentService {
 
     /**
      * 更新部门
-     * @param id 部门ID
-     * @param department 更新的部门信息
+     * @param department 更新的部门信息（包含ID）
      * @return 更新后的部门
      * @throws RuntimeException 部门不存在时抛出异常
      */
-    public Department updateDepartment(Long id, Department department) {
-        Department existing = departmentRepository.findById(id)
+    public Department updateDepartment(Department department) {
+        Department existing = departmentRepository.findById(department.getId())
                 .orElseThrow(() -> new RuntimeException("部门不存在"));
-        existing.setName(department.getName());
+        existing.setDeptName(department.getDeptName());
         existing.setDescription(department.getDescription());
         existing.setParentId(department.getParentId());
         existing.setManagerId(department.getManagerId());
@@ -124,6 +135,6 @@ public class DepartmentService {
      * @return 匹配的部门列表
      */
     public List<Department> searchDepartments(String keyword) {
-        return departmentRepository.findByNameContaining(keyword);
+        return departmentRepository.findByDeptNameContaining(keyword);
     }
 }

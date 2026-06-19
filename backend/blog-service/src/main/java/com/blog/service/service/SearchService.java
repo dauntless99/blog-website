@@ -1,15 +1,20 @@
 package com.blog.service.service;
 
-import com.blog.forum.entity.ForumThread;
-import com.blog.forum.repository.ForumThreadRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.blog.service.entity.BlogPost;
 import com.blog.service.repository.BlogPostRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.*;
 
@@ -21,8 +26,13 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SearchService {
 
+    private static final Logger log = LoggerFactory.getLogger(SearchService.class);
+
     private final BlogPostRepository blogPostRepository;
-    private final ForumThreadRepository forumThreadRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${search.forum-service-base-url:http://localhost:8083}")
+    private String forumServiceBaseUrl;
 
     /**
      * 统一搜索接口（同时搜索文章和帖子）
@@ -35,13 +45,13 @@ public class SearchService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         
         Page<BlogPost> blogResults = blogPostRepository.search(keyword, pageable);
-        Page<ForumThread> forumResults = forumThreadRepository.search(keyword, pageable);
+        ForumSearchPage forumResults = fetchForumThreads(keyword, null, null, null, null, page, size);
         
         Map<String, Object> result = new HashMap<>();
         result.put("blogPosts", blogResults.getContent());
-        result.put("forumThreads", forumResults.getContent());
+        result.put("forumThreads", forumResults.content());
         result.put("totalBlogCount", blogResults.getTotalElements());
-        result.put("totalForumCount", forumResults.getTotalElements());
+        result.put("totalForumCount", forumResults.totalElements());
         
         return result;
     }
@@ -96,28 +106,13 @@ public class SearchService {
      * @param size 每页大小
      * @return 分页帖子列表
      */
-    public Page<ForumThread> advancedSearchThreads(
+    public Page<Map<String, Object>> advancedSearchThreads(
             String keyword, Long categoryId, Long authorId,
             String sortBy, String sortOrder,
             int page, int size) {
-        
-        Sort sort = Sort.by(
-                "desc".equalsIgnoreCase(sortOrder) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                sortBy != null ? sortBy : "createdAt"
-        );
-        Pageable pageable = PageRequest.of(page, size, sort);
-        
-        if (keyword != null && !keyword.isEmpty()) {
-            return forumThreadRepository.search(keyword, pageable);
-        }
-        if (categoryId != null) {
-            return forumThreadRepository.findByCategoryIdOrderByIsPinnedDescCreatedAtDesc(categoryId, pageable);
-        }
-        if (authorId != null) {
-            return forumThreadRepository.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable);
-        }
-        
-        return forumThreadRepository.findByOrderByIsPinnedDescCreatedAtDesc(pageable);
+        Pageable pageable = PageRequest.of(page, size);
+        ForumSearchPage forumResults = fetchForumThreads(keyword, categoryId, authorId, sortBy, sortOrder, page, size);
+        return new PageImpl<>(forumResults.content(), pageable, forumResults.totalElements());
     }
 
     /**
@@ -208,17 +203,55 @@ public class SearchService {
             }
         }
         
-        // 从帖子标题中获取建议
-        List<ForumThread> threads = forumThreadRepository.search(prefix, PageRequest.of(0, 50)).getContent();
-        for (ForumThread thread : threads) {
-            if (thread.getTitle().toLowerCase().contains(prefix.toLowerCase())) {
-                suggestions.add(thread.getTitle());
-            }
-        }
-        
         return suggestions.stream()
                 .sorted()
                 .limit(limit)
                 .toList();
+    }
+
+    private ForumSearchPage fetchForumThreads(String keyword, Long categoryId, Long authorId,
+                                              String sortBy, String sortOrder, int page, int size) {
+        try {
+            String responseBody = RestClient.create()
+                    .get()
+                    .uri(forumServiceBaseUrl + "/api/forum/threads?keyword={keyword}&categoryId={categoryId}&authorId={authorId}&sortBy={sortBy}&sortOrder={sortOrder}&page={page}&size={size}",
+                            keyword, categoryId, authorId, sortBy, sortOrder, page, size)
+                    .retrieve()
+                    .body(String.class);
+
+            Map<String, Object> response = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            Object dataObject = response.get("data");
+            if (!(dataObject instanceof Map<?, ?> data)) {
+                return ForumSearchPage.empty();
+            }
+
+            List<Map<String, Object>> content = extractContent(data.get("content"));
+            Object totalElementsValue = data.containsKey("totalElements") ? data.get("totalElements") : 0L;
+            long totalElements = totalElementsValue instanceof Number number ? number.longValue() : 0L;
+            return new ForumSearchPage(content, totalElements);
+        } catch (Exception e) {
+            log.warn("论坛搜索调用失败，已降级为空结果: {}", e.getMessage());
+            return ForumSearchPage.empty();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> extractContent(Object contentObject) {
+        if (!(contentObject instanceof List<?> contentList)) {
+            return Collections.emptyList();
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object item : contentList) {
+            if (item instanceof Map<?, ?> itemMap) {
+                result.add((Map<String, Object>) itemMap);
+            }
+        }
+        return result;
+    }
+
+    private record ForumSearchPage(List<Map<String, Object>> content, long totalElements) {
+        private static ForumSearchPage empty() {
+            return new ForumSearchPage(Collections.emptyList(), 0);
+        }
     }
 }

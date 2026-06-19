@@ -1,9 +1,9 @@
 package com.blog.service.service;
 
-import com.blog.auth.entity.User;
-import com.blog.auth.repository.UserRepository;
-import com.blog.auth.service.PermissionService;
-import com.blog.auth.service.PointService;
+import com.blog.common.entity.User;
+import com.blog.common.repository.UserRepository;
+import com.blog.common.service.PermissionService;
+import com.blog.common.service.PointService;
 import com.blog.common.util.JwtUtil;
 import com.blog.service.entity.BlogComment;
 import com.blog.service.entity.BlogPost;

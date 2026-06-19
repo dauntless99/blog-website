@@ -71,7 +71,8 @@ public class DepartmentController {
     @PutMapping("/{id}")
     public Result<Department> updateDepartment(@PathVariable Long id, @RequestBody Department department) {
         try {
-            return Result.success("更新成功", departmentService.updateDepartment(id, department));
+            department.setId(id);
+            return Result.success("更新成功", departmentService.updateDepartment(department));
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }

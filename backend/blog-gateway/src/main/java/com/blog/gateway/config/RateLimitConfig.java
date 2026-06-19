@@ -3,6 +3,7 @@ package com.blog.gateway.config;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import reactor.core.publisher.Mono;
 
 /**
@@ -17,6 +18,7 @@ public class RateLimitConfig {
      * 优先使用用户ID，其次使用请求来源IP
      * @return KeyResolver实例
      */
+    @Primary
     @Bean
     public KeyResolver userKeyResolver() {
         return exchange -> {

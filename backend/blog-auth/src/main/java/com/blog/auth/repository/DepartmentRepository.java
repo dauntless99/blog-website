@@ -25,8 +25,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
     /**
      * 根据部门名称查询
-     * @param name 部门名称
+     * @param deptName 部门名称
      * @return 部门列表
      */
-    List<Department> findByNameContaining(String name);
+    List<Department> findByDeptNameContaining(String deptName);
 }

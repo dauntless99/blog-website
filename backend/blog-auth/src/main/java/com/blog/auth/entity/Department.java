@@ -16,10 +16,9 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "departments")
 public class Department extends BaseEntity {
-
     /** 部门名称 */
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(name = "dept_name", nullable = false, length = 100)
+    private String deptName;
 
     /** 部门描述 */
     @Column(length = 500)

@@ -80,7 +80,8 @@ public class RateLimitUtil {
                     byte[] windowBytes = String.valueOf(windowSeconds).getBytes();
                     return connection.scriptingCommands().eval(
                             scriptBytes,
-                            org.springframework.data.redis.connection.RedisScript.ReturnType.INTEGER,
+                            org.springframework.data.redis.connection.ReturnType.INTEGER,
+//                            org.springframework.data.redis.connection.RedisScript.ReturnType.INTEGER,
                             1,
                             keyBytes,
                             maxRequestsBytes,

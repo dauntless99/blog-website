@@ -16,7 +16,6 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "file_uploads")
 public class FileUpload extends BaseEntity {
-
     /** 原始文件名 */
     @Column(nullable = false, length = 255)
     private String originalName;
